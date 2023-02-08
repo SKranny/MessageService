@@ -1,0 +1,40 @@
+spring:
+    application:
+        name: message-service
+    datasource:
+        driverClassName: org.postgresql.Driver
+        url: ${MESSAGE_SERVICE_DATABASE_URL:jdbc:postgresql://localhost:5432/message_service}
+        username: ${MESSAGE_SERVICE_DATABASE_USER:postgres}
+        password: ${MESSAGE_SERVICE_DATABASE_PASSWORD}
+    kafka:
+        consumer:
+            group-id: message-service-id
+        bootstrap-servers: ${KAFKA_HOST:localhost:9092}
+    jpa:
+        generate-ddl: false
+        show-sql: ${SHOW_SQL:false}
+        properties:
+            hibernate:
+                ddl-auto: none
+                jdbc:
+                    lob:
+                        non_contextual_creation: true
+                    batch_size: 50
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+jwt:
+    secret-code: ${SECRET_KEY}
+
+eureka:
+    instance:
+        leaseRenewalIntervalInSeconds: 5
+        lease-expiration-duration-in-seconds: 5
+    client:
+        serviceUrl:
+            defaultZone: ${EUREKA_URI:http://localhost:8081/eureka}
+
+springdoc:
+    swagger-ui:
+        path: /docs/
+
+server:
+    port: 8088
