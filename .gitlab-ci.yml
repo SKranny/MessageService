@@ -1,0 +1,78 @@
+image: maven:3.8.6-openjdk-11
+
+variables:
+    MAVEN_OPTS: "-Dmaven.test.skip=true -Dmaven.repo.local=./.m2/repository"
+
+stages:
+    - build
+    - package
+    - build and push image
+    - deploy
+
+build:
+    stage: build
+    only:
+        - develop
+    except:
+        - tags
+    script:
+        - echo 'Build project'
+        - 'mvn $MAVEN_OPTS clean compile -U'
+    cache:
+        paths:
+            - ./target
+            - ./.m2
+
+package:
+    stage: package
+    only:
+        - develop
+    except:
+        - tags
+    script:
+        - 'mvn $MAVEN_OPTS package -U'
+    artifacts:
+        paths:
+            - target/*.jar
+    cache:
+        policy: pull
+        paths:
+            - ./target
+            - ./.m2
+
+build_and_push_image:
+    image: docker:stable
+    stage: build and push image
+    only:
+        - develop
+    except:
+        - tags
+    before_script:
+        - docker login -u $DOCKER_LOGIN -p $DOCKER_PASS docker.io
+    script:
+        - docker build -t $DOCKER_LOGIN/message-service:latest .
+        - docker push $DOCKER_LOGIN/message-service:latest
+
+
+deploy:
+    image: ubuntu:latest
+    stage: deploy
+    only:
+        - develop
+    except:
+        - tags
+    before_script:
+        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+        - eval $(ssh-agent -s)
+        - echo "cherry" | tr -d '\r' | ssh-add <(echo "$SSH_PRIVATE_KEY")
+        - mkdir -p ~/.ssh
+        - chmod 700 ~/.ssh
+        - echo "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+        - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+        - chmod 644 ~/.ssh/known_hosts
+    script:
+        - ssh deployer@$SERVER_IP "
+            echo "$SERVER_PASS" | sudo -S docker login -u $DOCKER_LOGIN -p $DOCKER_PASS docker.io;
+            echo "$SERVER_PASS" | sudo -S docker-compose stop message;
+            echo "$SERVER_PASS" | sudo -S docker-compose pull message;
+            echo "$SERVER_PASS" | sudo -S docker-compose up -d gateway"
