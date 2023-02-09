@@ -1,7 +1,8 @@
 image: maven:3.8.6-openjdk-11
 
-variables:
-    MAVEN_OPTS: "-Dmaven.test.skip=true -Dmaven.repo.local=./.m2/repository"
+cache:
+    paths:
+        - .m2/repository
 
 stages:
     - build
@@ -17,7 +18,7 @@ build:
         - tags
     script:
         - echo 'Build project'
-        - 'mvn $MAVEN_OPTS clean compile -U'
+        - 'mvn clean compile -Dmaven.test.skip=true -Dmaven.repo.local=./.m2/repository -s .m2/settings.xml -U'
     cache:
         paths:
             - ./target
@@ -30,7 +31,7 @@ package:
     except:
         - tags
     script:
-        - 'mvn $MAVEN_OPTS package -U'
+        - 'mvn package -Dmaven.test.skip=true -Dmaven.repo.local=./.m2/repository -s .m2/settings.xml -U'
     artifacts:
         paths:
             - target/*.jar
