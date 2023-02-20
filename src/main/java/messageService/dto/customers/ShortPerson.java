@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShortPerson {
-    private Long id;
-
     private Long personId;
 
     private String userName;

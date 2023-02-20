@@ -42,7 +42,8 @@ public class Chat {
 
     private String description;
 
-    private LocalDateTime createDateTime;
+    @Builder.Default
+    private LocalDateTime createDateTime = LocalDateTime.now();
 
     @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)

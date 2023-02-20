@@ -18,4 +18,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     Optional<Chat> findByIdAndConsumersIsContaining(Long chatId, Person person);
 
     Optional<Chat> findByConsumersIsContainingAndId(Person person, Long chatId);
+
+    @EntityGraph("chat_with_admin_and_consumers")
+    Optional<Chat> findWithConsumersById(Long chatId);
 }

@@ -6,22 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import messageService.constants.attachment.AttachmentType;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AttachmentDTO {
-    private Long id;
-
-    private Long messageId;
-
-    private AttachmentType type;
+public class SendAttachment {
+    private Long attachedMessageId;
 
     private String content;
 
     private Long postId;
 
-    private MessageDTO attachedMessage;
+    private AttachmentType type;
 }

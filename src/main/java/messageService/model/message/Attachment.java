@@ -29,9 +29,7 @@ public class Attachment {
 
     private Long postId;
 
-    @OneToMany
-    @JoinTable(name = "jt_attached_messages",
-            joinColumns = @JoinColumn(name = "attachment_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"))
-    private List<Message> attachedMessages;
+    @OneToOne
+    @JoinColumn(name = "attached_message_id", referencedColumnName = "id")
+    private Message attachedMessage;
 }

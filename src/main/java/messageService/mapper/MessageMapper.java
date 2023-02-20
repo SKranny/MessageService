@@ -1,15 +1,19 @@
 package messageService.mapper;
 
+import messageService.dto.customers.ShortPerson;
 import messageService.dto.mesage.AttachmentDTO;
 import messageService.dto.mesage.MessageDTO;
 import messageService.model.chat.Chat;
 import messageService.model.message.Attachment;
 import messageService.model.message.Message;
+import messageService.model.person.Person;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class MessageMapper {
@@ -38,6 +42,7 @@ public class MessageMapper {
         messageDTO.author( personMapper.toShort( message.getAuthor() ) );
         messageDTO.attachments( attachmentListToAttachmentDTOList( message.getAttachments() ) );
         messageDTO.createDateTime( message.getCreateDateTime() );
+        messageDTO.whoIsLike( personListToShortPersonList(message.getWhoIsLike()) );
 
         return messageDTO.build();
     }
@@ -68,5 +73,18 @@ public class MessageMapper {
         }
 
         return list1;
+    }
+
+    protected Set<ShortPerson> personListToShortPersonList(Set<Person> set) {
+        if ( set == null ) {
+            return null;
+        }
+
+        Set<ShortPerson> set1 = new HashSet<>( set.size() );
+        for ( Person person : set ) {
+            set1.add( personMapper.toShort( person ) );
+        }
+
+        return set1;
     }
 }

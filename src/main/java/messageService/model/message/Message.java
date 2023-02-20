@@ -27,7 +27,7 @@ public class Message {
 
     private String text;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
     private Person author;
 
@@ -41,15 +41,21 @@ public class Message {
     @OneToMany(mappedBy = "message")
     private List<Attachment> attachments = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "chat_id", referencedColumnName = "id")
     private Chat chat;
 
     @Builder.Default
-    @ManyToMany(mappedBy = "likeMessage")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "jt_message_like",
+            joinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"))
     private Set<Person> whoIsLike = new HashSet<>();
 
     @Builder.Default
-    @ManyToMany(mappedBy = "deletedMessages")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "jt_message_delete",
+            joinColumns = @JoinColumn(name = "message_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"))
     private Set<Person> whoIsDelete = new HashSet<>();
 }

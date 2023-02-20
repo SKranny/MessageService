@@ -10,16 +10,17 @@ import messageService.mapper.MessageMapper;
 import messageService.model.chat.Chat;
 import messageService.model.person.Person;
 import messageService.repository.chat.ChatRepository;
-import messageService.service.message.MessageService;
+import messageService.repository.message.MessageRepository;
 import messageService.service.person.PersonService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import security.dto.TokenData;
 
-import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,7 +28,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ChatService {
 
@@ -39,7 +39,7 @@ public class ChatService {
 
     private final MessageMapper messageMapper;
 
-    private final MessageService messageService;
+    private final MessageRepository messageRepository;
 
     private final PersonService personService;
 
@@ -70,23 +70,28 @@ public class ChatService {
 
     public Set<ChatDTO> getMyChats(TokenData data, Integer page, Integer offset) {
         Person person = personService.getOrCreatePerson(data.getId());
-
         Map<Long, ChatDTO> chats = chatRepository.findDistinctByConsumersContaining(person,
                         buildPageableByPropDesc(page, offset, "createDateTime"))
                 .get().map(chat -> changeNameIfChatTypeIsPrivate(chat, person))
                 .map(chatMapper::toDTO)
                 .collect(Collectors.toMap(ChatDTO::getId, chat -> chat));
-
-        findAndSetLastMessagesToChats(chats);
+        findAndSetLastMessagesToChats(chats, data.getId());
         return new HashSet<>(chats.values());
     }
 
-    private void findAndSetLastMessagesToChats(Map<Long, ChatDTO> chats) {
-        messageService.findLastMessagesByChatIds(chats.keySet())
+    private void findAndSetLastMessagesToChats(Map<Long, ChatDTO> chats, Long personId) {
+        messageRepository.findLastMessagesByChatsId(chats.keySet(), personId)
                 .forEach(ms -> chats.get(ms.getChat().getId())
-                        .setLastMessage(messageMapper.toDTO(ms)));
+                        .setLastMessage(messageMapper.toDTO(ms)));;
     }
 
+    private void ensurePrivateChatMaxConsumers(Integer countConsumers, @NotNull ChatType type) {
+        if (countConsumers != 2 && type == ChatType.PRIVATE) {
+            throw new MessageException("Error! Allowed only 2 customer!");
+        }
+    }
+
+    @Transactional
     public ChatDTO createNewChat(CreateChatRequest req, TokenData tokenData) {
         Set<Person> consumers = personService.getPersons(req.getConsumersIds());
         Person admin = personService.getOrCreatePerson(tokenData.getId());
@@ -100,10 +105,11 @@ public class ChatService {
                 .consumers(consumers)
                 .admin(admin)
                 .build();
-
+        ensurePrivateChatMaxConsumers(chat.getConsumers().size(), req.getType());
         return chatMapper.toDTO(chatRepository.save(chat));
     }
 
+    @Transactional
     public String uploadPhoto(MultipartFile file) {
         try {
             return awsClient.uploadImage(file);
@@ -124,6 +130,7 @@ public class ChatService {
         awsClient.deleteImage(key);
     }
 
+    @Transactional
     public String updatePhoto(Long chatId, MultipartFile file, TokenData data) {
         Chat chat = findMyChat(chatId, data.getId());
         chat.setPhoto(uploadPhoto(file));
@@ -131,6 +138,7 @@ public class ChatService {
         return chat.getPhoto();
     }
 
+    @Transactional
     public void deleteChatPhoto(Long chatId, TokenData data) {
         Chat chat = findMyChat(chatId, data.getId());
         deletePhoto(chat);
@@ -142,6 +150,7 @@ public class ChatService {
         return chatMapper.toDetail(chat);
     }
 
+    @Transactional
     public void updateChatInfo(UpdateChatInfoRequest req, TokenData data) {
         Chat chat = chatRepository.findByIdAndConsumersIsContaining(req.getChatId(),
                         personService.getOrCreatePerson(data.getId()))
@@ -161,12 +170,15 @@ public class ChatService {
         return Optional.ofNullable(sourceField).orElse(targetField);
     }
 
+    @Transactional
     public void addConsumerToChat(UpdateTheChatLineupRequest req, TokenData data) {
         Chat chat = findMyChat(req.getChatId(), data.getId());
         chat.getConsumers().addAll(personService.getPersons(req.getConsumersId()));
+        ensurePrivateChatMaxConsumers(chat.getConsumers().size(), chat.getType());
         chatRepository.save(chat);
     }
 
+    @Transactional
     public void deleteChat(Long id, boolean isForceDelete, TokenData tokenData) {
         Chat chat = chatRepository.findByIdAndConsumersIsContaining(id,
                         personService.getOrCreatePerson(tokenData.getId()))
@@ -180,5 +192,16 @@ public class ChatService {
                     .collect(Collectors.toSet()));
             chatRepository.save(chat);
         }
+    }
+
+    public Set<Long> getConsumersId(Long chatId) {
+        Chat chat = chatRepository.findWithConsumersById(chatId)
+                .orElseThrow(() -> new MessageException("Error! Chat not found!", HttpStatus.NOT_FOUND));
+        return chat.getConsumers().stream().map(Person::getPersonId).collect(Collectors.toSet());
+    }
+
+    public Chat findById(Long chatId) {
+        return chatRepository.findById(chatId)
+                .orElseThrow(() -> new MessageException("Error! Chat not found!", HttpStatus.NOT_FOUND));
     }
 }

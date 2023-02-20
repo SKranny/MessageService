@@ -10,6 +10,7 @@ import messageService.model.person.Person;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -27,5 +28,7 @@ public class MessageDTO {
     private List<AttachmentDTO> attachments;
 
     private LocalDateTime createDateTime;
+
+    private Set<ShortPerson> whoIsLike;
 
 }

@@ -1,7 +1,6 @@
 package messageService.service.person;
 
 import dto.userDto.PersonDTO;
-import kafka.dto.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import messageService.exception.MessageException;
@@ -55,5 +54,10 @@ public class PersonService {
 
     public Set<Person> getPersons(List<Long> consumersIds) {
         return personRepository.findAllByPersonIdIn(consumersIds);
+    }
+
+    public Person findById(Long personId) {
+        return personRepository.findByPersonId(personId)
+                .orElseThrow(() -> new MessageException("Error! User not found"));
     }
 }

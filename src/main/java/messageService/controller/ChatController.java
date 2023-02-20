@@ -65,15 +65,4 @@ public class ChatController {
             TokenAuthentication authentication) {
         chatService.deleteChat(id, isForceDelete, authentication.getTokenData());
     }
-//
-//
-//    @GetMapping("/{id}/messages")
-//    public Set<MessageDTO> getAllMessages(@PathVariable("id") Long chatId, TokenAuthentication authentication) {
-//        return new HashSet<>();
-//    }
-//
-//    @PutMapping("/{id}/messages")
-//    public void updateMessage(@PathVariable("id") Long chatId, @Valid @RequestBody UpdateMessageRequest req, TokenAuthentication authentication) {
-//    }
-
 }
