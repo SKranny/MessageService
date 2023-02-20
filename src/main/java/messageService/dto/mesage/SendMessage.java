@@ -20,8 +20,6 @@ public class SendMessage {
 
     private Long chatId;
 
-    private Long postId;
-
     private String content;
 
     private List<SendAttachment> messageAttachments;
