@@ -91,11 +91,31 @@ public class ChatService {
         }
     }
 
-    @Transactional
-    public ChatDTO createNewChat(CreateChatRequest req, TokenData tokenData) {
-        Set<Person> consumers = personService.getPersons(req.getConsumersIds());
+    private Long getNotAdminId(Set<Long> consumersIds, Long adminId) {
+        consumersIds.add(adminId);
+        return consumersIds.stream().filter(id -> !Objects.equals(id, adminId)).findFirst()
+                .orElseThrow(() -> new MessageException("Error! Invalid consumers data!"));
+    }
+
+    public ChatDTO getOrCreateChat(CreateChatRequest req, TokenData tokenData) {
         Person admin = personService.getOrCreatePerson(tokenData.getId());
+        Set<Person> consumers = personService.getPersons(req.getConsumersIds());
         consumers.add(admin);
+        ensurePrivateChatMaxConsumers(consumers.size(), req.getType());
+        switch (req.getType()) {
+            case PRIVATE:
+                Long consumerId = getNotAdminId(consumers.stream().map(Person::getId).collect(Collectors.toSet()), admin.getId());
+                return chatRepository.findPrivateChatByConsumersId(consumerId, admin.getId())
+                        .map(chatMapper::toDTO).orElseGet(() -> createNewChat(req, admin, consumers));
+            case COOPERATIVE:
+                return createNewChat(req, admin, consumers);
+            default:
+                throw new MessageException("Error! Unknown chat type");
+        }
+    }
+
+    @Transactional
+    public ChatDTO createNewChat(CreateChatRequest req, Person admin, Set<Person> consumers) {
         Chat chat = Chat.builder()
                 .type(req.getType())
                 .name(req.getName())
@@ -105,7 +125,7 @@ public class ChatService {
                 .consumers(consumers)
                 .admin(admin)
                 .build();
-        ensurePrivateChatMaxConsumers(chat.getConsumers().size(), req.getType());
+        ensurePrivateChatMaxConsumers(consumers.size(), req.getType());
         return chatMapper.toDTO(chatRepository.save(chat));
     }
 

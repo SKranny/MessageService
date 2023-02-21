@@ -10,7 +10,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,7 +52,7 @@ public class PersonService {
                 .orElseThrow(() -> new MessageException("Error! User not found"));
     }
 
-    public Set<Person> getPersons(List<Long> consumersIds) {
+    public Set<Person> getPersons(Collection<Long> consumersIds) {
         return personRepository.findAllByPersonIdIn(consumersIds);
     }
 

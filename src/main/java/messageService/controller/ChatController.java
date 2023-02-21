@@ -28,7 +28,7 @@ public class ChatController {
 
     @PostMapping
     public ChatDTO createNewChat(@Valid @RequestBody CreateChatRequest req, TokenAuthentication authentication) {
-        return chatService.createNewChat(req, authentication.getTokenData());
+        return chatService.getOrCreateChat(req, authentication.getTokenData());
     }
 
     @PutMapping("/{id}/photo")
