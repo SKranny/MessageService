@@ -21,13 +21,16 @@ public class WSHandshakeInterceptor implements HandshakeInterceptor {
         log.info("BeforeHandshake start");
         try {
             URI uri = request.getURI();
-            String token = uri.getQuery().split("=")[1];
-            attributes.put("Authorization", token);
-            log.info("Invalid request");
-            return true;
+            if (request.getURI().toString().contains("/messenger") && request.getURI().getQuery().contains("token")) {
+                attributes.put("Authorization", uri.getQuery().split("=")[1]);
+                return true;
+            }
         } catch (Exception ex) {
+            log.info("Invalid request");
             throw new MessageException("No", HttpStatus.UNAUTHORIZED);
         }
+        log.info("Invalid request");
+        return false;
     }
 
     @Override

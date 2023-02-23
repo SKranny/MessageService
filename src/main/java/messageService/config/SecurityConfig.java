@@ -12,7 +12,7 @@ public class SecurityConfig {
     public HttpSecurity httpSecurity(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .authorizeHttpRequests(conf -> {
-                    conf.antMatchers("/messenger").permitAll();
+                    conf.antMatchers("/messenger").authenticated();
                     conf.antMatchers("/api/v1/message/**").authenticated();
                     conf.antMatchers("/api/v1/chats/**").authenticated();
                     conf.antMatchers("/v3/api-docs/**").permitAll();
