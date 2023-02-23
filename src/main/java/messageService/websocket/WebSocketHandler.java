@@ -8,6 +8,8 @@ import messageService.constants.messages.MessageType;
 import messageService.dto.mesage.DeleteMessage;
 import messageService.dto.mesage.LikeMessage;
 import messageService.dto.mesage.SendMessage;
+import messageService.service.person.PersonMicroService;
+import messageService.service.person.PersonService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,11 +27,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private final JwtService jwtService;
 
-    @Autowired
-    private MessageBrokerHandler messageBrokerHandler;
+    private final MessageBrokerHandler messageBrokerHandler;
 
-    @Autowired
-    private WebSocketSessionPool webSocketSessionPool;
+    private  final WebSocketSessionPool webSocketSessionPool;
+
+    private final PersonMicroService personMicroService;
 
     private final ObjectMapper jacksonHandler;
 
@@ -47,10 +49,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
-        mapMessage(MessageType.getMessageByString(
-                new JSONObject(textMessage.getPayload()).getString("type")),
-                textMessage
-        );
+        mapMessage(MessageType.getMessageByString(new JSONObject(textMessage.getPayload()).getString("type")), textMessage);
     }
 
     @SneakyThrows

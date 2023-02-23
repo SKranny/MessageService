@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import messageService.constants.messages.MessageType;
 import messageService.dto.mesage.DeleteMessage;
 import messageService.dto.mesage.LikeMessage;
 import messageService.dto.mesage.MessageDTO;
