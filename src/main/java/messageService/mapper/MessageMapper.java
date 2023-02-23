@@ -1,5 +1,6 @@
 package messageService.mapper;
 
+import messageService.constants.messages.MessageType;
 import messageService.dto.customers.ShortPerson;
 import messageService.dto.mesage.AttachmentDTO;
 import messageService.dto.mesage.MessageDTO;
@@ -43,6 +44,7 @@ public class MessageMapper {
         messageDTO.attachments( attachmentListToAttachmentDTOList( message.getAttachments() ) );
         messageDTO.createDateTime( message.getCreateDateTime() );
         messageDTO.whoIsLike( personListToShortPersonList(message.getWhoIsLike()) );
+        messageDTO.type(MessageType.SEND_MESSAGE);
 
         return messageDTO.build();
     }

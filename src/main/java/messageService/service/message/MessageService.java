@@ -113,7 +113,7 @@ public class MessageService {
     public Long deleteMessage(DeleteMessage deleteMessage) {
         Message message = messageRepository.findWithAuthorById(deleteMessage.getMessageId())
                 .orElseThrow(() -> new MessageException("Error! Message not found!"));
-        if (Objects.equals(message.getAuthor().getId(), deleteMessage.getPersonId()) && isTrue(deleteMessage.getIsForce())) {
+        if (Objects.equals(message.getAuthor().getPersonId(), deleteMessage.getPersonId()) && isTrue(deleteMessage.getIsForce())) {
             messageRepository.deleteById(deleteMessage.getMessageId());
         } else {
             message.getWhoIsDelete().add(personService.findById(deleteMessage.getPersonId()));

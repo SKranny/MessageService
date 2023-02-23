@@ -32,5 +32,5 @@ public class MessageDTO {
 
     private Set<ShortPerson> whoIsLike;
 
-    private MessageType type = MessageType.SEND_MESSAGE;
+    private MessageType type;
 }
