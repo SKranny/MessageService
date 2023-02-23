@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import messageService.constants.messages.MessageType;
 import messageService.dto.customers.ShortPerson;
 import messageService.model.person.Person;
 
@@ -31,4 +32,5 @@ public class MessageDTO {
 
     private Set<ShortPerson> whoIsLike;
 
+    private MessageType type = MessageType.SEND_MESSAGE;
 }
