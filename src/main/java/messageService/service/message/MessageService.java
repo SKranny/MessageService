@@ -123,7 +123,7 @@ public class MessageService {
     }
 
     public Page<MessageDTO> getMessagesByFilter(Long chatId, Long personId, PageRequest pageable) {
-        pageable = pageable.withSort(Sort.by("createDateTime").descending());
+        pageable = pageable.withSort(Sort.by("createDateTime").ascending());
         Person person = personService.findById(personId);
         Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContaining(chatId, person, pageable);
         return new PageImpl<>(messagePage.getContent().stream()
