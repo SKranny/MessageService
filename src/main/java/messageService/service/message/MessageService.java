@@ -123,12 +123,11 @@ public class MessageService {
     }
 
     public Page<MessageDTO> getMessagesByFilter(Long chatId, Long personId, PageRequest pageable) {
-        pageable = pageable.withSort(Sort.by("createDateTime").ascending());
         Person person = personService.findById(personId);
-        Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContaining(chatId, person, pageable);
+        Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person, pageable);
         return new PageImpl<>(messagePage.getContent().stream()
                 .map(messageMapper::toDTO)
                 .collect(Collectors.toList()),
-                pageable, messageRepository.countAllByChat_IdAndWhoIsDeleteIsNotContaining(chatId, person));
+                pageable, messageRepository.countAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person));
     }
 }

@@ -29,7 +29,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     Optional<Message> findWithAuthorById(Long id);
 
-    Page<Message> findAllByChat_IdAndWhoIsDeleteIsNotContaining(Long chatId, Person whoIsDelete, Pageable pageable);
+    Page<Message> findAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(Long chatId, Person whoIsDelete, Pageable pageable);
 
-    long countAllByChat_IdAndWhoIsDeleteIsNotContaining(Long chatId, Person whoIsDelete);
+    long countAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(Long chatId, Person whoIsDelete);
 }
