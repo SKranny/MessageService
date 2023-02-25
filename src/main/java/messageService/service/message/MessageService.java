@@ -1,6 +1,5 @@
 package messageService.service.message;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import messageService.constants.attachment.AttachmentType;
@@ -20,8 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,8 +33,6 @@ public class MessageService {
     private final PersonService personService;
 
     private final MessageMapper messageMapper;
-
-    private final ObjectMapper jacksonMapper;
 
     @Lazy
     private final ChatService chatService;
@@ -63,7 +59,7 @@ public class MessageService {
                 .author(personService.findById(sendMessage.getAuthorId()))
                 .chat(chatService.findById(sendMessage.getChatId()))
                 .attachments(buildAttachments(Optional.ofNullable(sendMessage.getMessageAttachments()).orElse(new ArrayList<>())))
-                .createDateTime(LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow")))
+                .createDateTime(ZonedDateTime.now())
                 .build();
         messageRepository.save(message);
         return messageMapper.toDTO(message);

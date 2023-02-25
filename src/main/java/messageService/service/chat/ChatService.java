@@ -123,7 +123,7 @@ public class ChatService {
                 .name(req.getName())
                 .photo(req.getPhoto())
                 .description(req.getDescription())
-                .createDateTime(LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow")))
+                .createDateTime(ZonedDateTime.now())
                 .consumers(consumers)
                 .admin(admin)
                 .build();
