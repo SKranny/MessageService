@@ -1,6 +1,8 @@
 package messageService.service.message;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import messageService.constants.attachment.AttachmentType;
 import messageService.dto.mesage.*;
 import messageService.exception.MessageException;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +37,8 @@ public class MessageService {
     private final PersonService personService;
 
     private final MessageMapper messageMapper;
+
+    private final ObjectMapper jacksonMapper;
 
     @Lazy
     private final ChatService chatService;
@@ -123,9 +128,13 @@ public class MessageService {
         return message.getChat().getId();
     }
 
+    @SneakyThrows
     public Page<MessageDTO> getMessagesByFilter(Long chatId, Long personId, PageRequest pageable) {
         Person person = personService.findById(personId);
         Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person, pageable);
+        Message message = messagePage.getContent().get(0);
+        ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow"));
+        System.out.println(jacksonMapper.writeValueAsString(zonedDateTime));
         return new PageImpl<>(messagePage.getContent().stream()
                 .sorted(Comparator.comparing(Message::getCreateDateTime))
                 .map(messageMapper::toDTO)
