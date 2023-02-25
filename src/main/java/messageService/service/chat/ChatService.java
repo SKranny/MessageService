@@ -77,7 +77,6 @@ public class ChatService {
                 .collect(Collectors.toList());
 
         Map<Long, ChatDTO> chatDTOs = findAndSetConsumers(chats);
-
         findAndSetLastMessagesToChats(chatDTOs, data.getId());
 
         return new PageImpl<>(new ArrayList<>(chatDTOs.values()), pageable,
@@ -89,10 +88,12 @@ public class ChatService {
                 .collect(Collectors.toMap(Chat::getId,
                         c -> c.getConsumers().stream().map(Person::getPersonId).collect(Collectors.toList())));
         Map<Long, Long> chatToAdmin = chats.stream()
-                .collect(Collectors.toMap(Chat::getId, c -> c.getAdmin().getId()));
+                .collect(Collectors.toMap(Chat::getId, c -> c.getAdmin().getPersonId()));
         Map<Long, PersonDTO> persons = personService.getAllPersonDTOByIds(chatToPerson.values().stream()
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList())).stream().collect(Collectors.toMap(PersonDTO::getId, p -> p));
+                .collect(Collectors.toList())).stream()
+                    .peek(p -> p.setPassword(null))
+                    .collect(Collectors.toMap(PersonDTO::getId, p -> p));
         return chats.stream().map(chatMapper::toDTO)
                 .peek(chatDTO -> chatDTO.setAdmin(persons.get(chatToAdmin.get(chatDTO.getId()))))
                 .peek(chatDTO -> chatDTO.setConsumers(findPersonsInMap(chatToPerson.get(chatDTO.getId()), persons)))
