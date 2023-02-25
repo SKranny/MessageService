@@ -10,6 +10,7 @@ import messageService.dto.customers.ShortPerson;
 import messageService.model.person.Person;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +29,7 @@ public class MessageDTO {
 
     private List<AttachmentDTO> attachments;
 
-    private LocalDateTime createDateTime;
+    private ZonedDateTime createDateTime;
 
     private Set<ShortPerson> whoIsLike;
 

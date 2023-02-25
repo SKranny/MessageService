@@ -8,6 +8,8 @@ import messageService.model.person.Person;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +45,7 @@ public class Chat {
     private String description;
 
     @Builder.Default
-    private LocalDateTime createDateTime = LocalDateTime.now();
+    private ZonedDateTime createDateTime = LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow"));
 
     @Builder.Default
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)

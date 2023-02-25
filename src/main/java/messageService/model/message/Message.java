@@ -7,6 +7,8 @@ import messageService.model.person.Person;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +37,8 @@ public class Message {
     @Builder.Default
     private Boolean isChange = false;
 
-    private LocalDateTime createDateTime;
+    @Builder.Default
+    private ZonedDateTime createDateTime = LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow"));
 
     @Builder.Default
     @OneToMany(mappedBy = "message")

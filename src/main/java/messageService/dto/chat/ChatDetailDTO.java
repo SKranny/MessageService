@@ -8,6 +8,7 @@ import messageService.constants.chat.ChatType;
 import messageService.dto.customers.ShortPerson;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Data
@@ -29,5 +30,5 @@ public class ChatDetailDTO {
 
     private List<ShortPerson> consumers;
 
-    private LocalDateTime createDateTime;
+    private ZonedDateTime createDateTime;
 }

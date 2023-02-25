@@ -22,6 +22,8 @@ import security.dto.TokenData;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,7 +123,7 @@ public class ChatService {
                 .name(req.getName())
                 .photo(req.getPhoto())
                 .description(req.getDescription())
-                .createDateTime(LocalDateTime.now())
+                .createDateTime(LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow")))
                 .consumers(consumers)
                 .admin(admin)
                 .build();

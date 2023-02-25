@@ -8,6 +8,7 @@ import messageService.constants.chat.ChatType;
 import messageService.dto.mesage.MessageDTO;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -24,5 +25,5 @@ public class ChatDTO {
 
     private MessageDTO lastMessage;
 
-    private LocalDateTime createDateTime;
+    private ZonedDateTime createDateTime;
 }

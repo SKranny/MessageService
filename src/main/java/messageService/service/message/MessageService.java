@@ -17,13 +17,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +63,7 @@ public class MessageService {
                 .author(personService.findById(sendMessage.getAuthorId()))
                 .chat(chatService.findById(sendMessage.getChatId()))
                 .attachments(buildAttachments(Optional.ofNullable(sendMessage.getMessageAttachments()).orElse(new ArrayList<>())))
-                .createDateTime(LocalDateTime.now())
+                .createDateTime(LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow")))
                 .build();
         messageRepository.save(message);
         return messageMapper.toDTO(message);
@@ -132,9 +130,6 @@ public class MessageService {
     public Page<MessageDTO> getMessagesByFilter(Long chatId, Long personId, PageRequest pageable) {
         Person person = personService.findById(personId);
         Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person, pageable);
-        Message message = messagePage.getContent().get(0);
-        ZonedDateTime zonedDateTime = LocalDateTime.now().atZone(ZoneId.of("Europe/Moscow"));
-        System.out.println(jacksonMapper.writeValueAsString(zonedDateTime));
         return new PageImpl<>(messagePage.getContent().stream()
                 .sorted(Comparator.comparing(Message::getCreateDateTime))
                 .map(messageMapper::toDTO)
