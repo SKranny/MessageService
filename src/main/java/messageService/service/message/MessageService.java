@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -126,6 +127,7 @@ public class MessageService {
         Person person = personService.findById(personId);
         Page<Message> messagePage = messageRepository.findAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person, pageable);
         return new PageImpl<>(messagePage.getContent().stream()
+                .sorted(Comparator.comparing(Message::getCreateDateTime))
                 .map(messageMapper::toDTO)
                 .collect(Collectors.toList()),
                 pageable, messageRepository.countAllByChat_IdAndWhoIsDeleteIsNotContainingOrderByCreateDateTimeDesc(chatId, person));
