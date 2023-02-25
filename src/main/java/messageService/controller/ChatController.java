@@ -3,6 +3,7 @@ package messageService.controller;
 import lombok.RequiredArgsConstructor;
 import messageService.dto.chat.*;
 import messageService.service.chat.ChatService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import security.TokenAuthentication;
@@ -19,9 +20,9 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping
-    public Set<ChatDTO> getMyChats(
+    public Page<ChatDTO> getMyChats(
             @Valid @Min(0) @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-            @RequestParam(name = "offset", required = false, defaultValue = "20") Integer offset,
+            @Valid @Min(0) @RequestParam(name = "offset", required = false, defaultValue = "20") Integer offset,
             TokenAuthentication authentication) {
         return chatService.getMyChats(authentication.getTokenData(), page, offset);
     }
@@ -41,11 +42,6 @@ public class ChatController {
     @DeleteMapping("/{id}/photo")
     public void deleteChatPhoto(@PathVariable("id") Long chatId, TokenAuthentication authentication) {
         chatService.deleteChatPhoto(chatId, authentication.getTokenData());
-    }
-
-    @GetMapping("/detail/{id}")
-    public ChatDetailDTO getChatInfo(@PathVariable("id") Long chatId, TokenAuthentication authentication) {
-        return chatService.getChatDetail(chatId, authentication.getTokenData());
     }
 
     @PutMapping

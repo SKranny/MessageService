@@ -1,6 +1,7 @@
 package messageService.service.chat;
 
 import aws.AwsClient;
+import dto.userDto.PersonDTO;
 import lombok.RequiredArgsConstructor;
 import messageService.constants.chat.ChatType;
 import messageService.dto.chat.*;
@@ -12,8 +13,7 @@ import messageService.model.person.Person;
 import messageService.repository.chat.ChatRepository;
 import messageService.repository.message.MessageRepository;
 import messageService.service.person.PersonService;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import security.dto.TokenData;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -70,15 +68,42 @@ public class ChatService {
         return chat;
     }
 
-    public Set<ChatDTO> getMyChats(TokenData data, Integer page, Integer offset) {
+    public Page<ChatDTO> getMyChats(TokenData data, Integer page, Integer offset) {
         Person person = personService.getOrCreatePerson(data.getId());
-        Map<Long, ChatDTO> chats = chatRepository.findDistinctByConsumersContaining(person,
-                        buildPageableByPropDesc(page, offset, "createDateTime"))
+        Pageable pageable = buildPageableByPropDesc(page, offset, "createDateTime");
+
+        List<Chat> chats = chatRepository.findDistinctByConsumersContaining(person, pageable)
                 .get().map(chat -> changeNameIfChatTypeIsPrivate(chat, person))
-                .map(chatMapper::toDTO)
-                .collect(Collectors.toMap(ChatDTO::getId, chat -> chat));
-        findAndSetLastMessagesToChats(chats, data.getId());
-        return new HashSet<>(chats.values());
+                .collect(Collectors.toList());
+
+        Map<Long, ChatDTO> chatDTOs = findAndSetConsumers(chats);
+
+        findAndSetLastMessagesToChats(chatDTOs, data.getId());
+
+        return new PageImpl<>(new ArrayList<>(chatDTOs.values()), pageable,
+                chatRepository.countDistinctByConsumersContaining(person));
+    }
+
+    private Map<Long, ChatDTO> findAndSetConsumers(List<Chat> chats) {
+        Map<Long, List<Long>> chatToPerson = chats.stream()
+                .collect(Collectors.toMap(Chat::getId,
+                        c -> c.getConsumers().stream().map(Person::getPersonId).collect(Collectors.toList())));
+        Map<Long, Long> chatToAdmin = chats.stream()
+                .collect(Collectors.toMap(Chat::getId, c -> c.getAdmin().getId()));
+        Map<Long, PersonDTO> persons = personService.getAllPersonDTOByIds(chatToPerson.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList())).stream().collect(Collectors.toMap(PersonDTO::getId, p -> p));
+        return chats.stream().map(chatMapper::toDTO)
+                .peek(chatDTO -> chatDTO.setAdmin(persons.get(chatToAdmin.get(chatDTO.getId()))))
+                .peek(chatDTO -> chatDTO.setConsumers(findPersonsInMap(chatToPerson.get(chatDTO.getId()), persons)))
+                .collect(Collectors.toMap(ChatDTO::getId, chatDTO -> chatDTO));
+    }
+
+    private Set<PersonDTO> findPersonsInMap(List<Long> personIds, Map<Long, PersonDTO> persons) {
+        return personIds.stream()
+                .map(persons::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     private void findAndSetLastMessagesToChats(Map<Long, ChatDTO> chats, Long personId) {
@@ -165,11 +190,6 @@ public class ChatService {
         Chat chat = findMyChat(chatId, data.getId());
         deletePhoto(chat);
         chatRepository.save(chat);
-    }
-
-    public ChatDetailDTO getChatDetail(Long chatId, TokenData data) {
-        Chat chat = findMyChat(chatId, data.getId());
-        return chatMapper.toDetail(chat);
     }
 
     @Transactional

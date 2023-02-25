@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,6 +53,10 @@ public class PersonService {
                 .orElseThrow(() -> new MessageException("Error! User not found"));
     }
 
+    public Set<PersonDTO> getAllPersonDTOByIds(List<Long> ids) {
+        return personMicroService.getAccountByIds(ids);
+    }
+
     public Set<Person> getPersons(Collection<Long> consumersIds) {
         return personRepository.findAllByPersonIdIn(consumersIds);
     }
@@ -60,4 +65,5 @@ public class PersonService {
         return personRepository.findByPersonId(personId)
                 .orElseThrow(() -> new MessageException("Error! User not found"));
     }
+
 }

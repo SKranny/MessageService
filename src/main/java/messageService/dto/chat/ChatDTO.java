@@ -1,5 +1,6 @@
 package messageService.dto.chat;
 
+import dto.userDto.PersonDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,8 @@ import messageService.dto.mesage.MessageDTO;
 
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -24,6 +27,12 @@ public class ChatDTO {
     private ChatType type;
 
     private MessageDTO lastMessage;
+
+    private String description;
+
+    private PersonDTO admin;
+
+    private Set<PersonDTO> consumers;
 
     private ZonedDateTime createDateTime;
 }

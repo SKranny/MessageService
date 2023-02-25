@@ -13,7 +13,10 @@ import java.util.Optional;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
+    @EntityGraph("chat_with_admin_and_consumers")
     Page<Chat> findDistinctByConsumersContaining(Person person, Pageable pageable);
+
+    long countDistinctByConsumersContaining(Person person);
 
     @EntityGraph("chat_with_admin_and_consumers")
     Optional<Chat> findByIdAndConsumersIsContaining(Long chatId, Person person);
