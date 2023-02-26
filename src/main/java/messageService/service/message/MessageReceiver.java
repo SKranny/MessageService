@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import messageService.dto.mesage.DeleteMessage;
-import messageService.dto.mesage.LikeMessage;
-import messageService.dto.mesage.MessageDTO;
-import messageService.dto.mesage.SendMessage;
+import messageService.dto.mesage.*;
+import messageService.model.person.Person;
 import messageService.service.chat.ChatService;
+import messageService.service.person.PersonService;
 import messageService.websocket.WebSocketSessionPool;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,6 +26,8 @@ public class MessageReceiver {
     private final ChatService chatService;
 
     private final WebSocketSessionPool socketSessionPool;
+
+    private final PersonService personService;
 
     private final MessageService messageService;
 
@@ -87,6 +88,26 @@ public class MessageReceiver {
 
     @SneakyThrows
     private TextMessage buildTextMessage(@Payload DeleteMessage message) {
+        return new TextMessage(jacksonHandler.writeValueAsString(message));
+    }
+
+
+    @SneakyThrows
+    @KafkaListener(topics = "WRITE_MESSAGE")
+    public void handleDeleteMessage(WriteMessage writeMessage) {
+        log.info("Delete message: " + jacksonHandler.writeValueAsString(writeMessage));
+        Person person = personService.findById(writeMessage.getPersonId());
+        writeMessage.setUserName(person.getUserName());
+        sendMessageToChanel(writeMessage);
+    }
+
+    private void sendMessageToChanel(WriteMessage message) {
+        Set<WebSocketSession> sessions = socketSessionPool.getPersonWebSocketSession(chatService.getConsumersId(message.getChatId()));
+        sessions.forEach(session -> sendMessageToSession(session, buildTextMessage(message)));
+    }
+
+    @SneakyThrows
+    private TextMessage buildTextMessage(@Payload WriteMessage message) {
         return new TextMessage(jacksonHandler.writeValueAsString(message));
     }
 }

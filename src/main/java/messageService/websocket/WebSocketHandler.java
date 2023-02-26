@@ -8,6 +8,7 @@ import messageService.constants.messages.MessageType;
 import messageService.dto.mesage.DeleteMessage;
 import messageService.dto.mesage.LikeMessage;
 import messageService.dto.mesage.SendMessage;
+import messageService.dto.mesage.WriteMessage;
 import messageService.service.person.PersonMicroService;
 import messageService.service.person.PersonService;
 import org.json.JSONObject;
@@ -63,6 +64,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 break;
             case DELETE_MESSAGE:
                 messageBrokerHandler.deleteMessage(type.name(), jacksonHandler.readValue(textMessage.getPayload(), DeleteMessage.class));
+                break;
+            case WRITE_MESSAGE:
+                messageBrokerHandler.personWriteMessage(type.name(), jacksonHandler.readValue(textMessage.getPayload(), WriteMessage.class));
         }
     }
 }
