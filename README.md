@@ -7,3 +7,4 @@ Here the functionality of dialogs with other users and group chats is implemente
 
 ## Service Technologies
 
+## Technical Description
