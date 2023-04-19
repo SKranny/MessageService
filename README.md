@@ -1,5 +1,5 @@
-### Java Spring project
-MessageService
+# Java Spring project "Social networking site"
+### MessageService
 
 ## Description
 This service is responsible for messenger within the social network.
