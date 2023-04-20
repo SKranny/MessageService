@@ -32,4 +32,4 @@ Here the functionality of dialogs with other users and group chats is implemente
     - EUREKA_URI (Address of your Eureka server. Specify it if you are not going to use the default address: http://localhost:8081/eureka)
 2. Run the file MessageApplication.java.
 
-The application uses port 8088
+The application uses port 8088.
