@@ -31,4 +31,5 @@ Here the functionality of dialogs with other users and group chats is implemente
     - SECRET_KEY (Your application's secret key. This is needed to protect your service which uses JWT technology)
     - EUREKA_URI (Address of your Eureka server. Specify it if you are not going to use the default address: http://localhost:8081/eureka)
 2. Run the file MessageApplication.java.
+
 The application uses port 8088
