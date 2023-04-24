@@ -33,3 +33,5 @@ Here the functionality of dialogs with other users and group chats is implemente
 2. Run the file MessageApplication.java.
 
 The application uses port 8088.
+
+If you want to see the full functionality of the service go to the controllers folder inside the project, where each method will have a brief description of its functionality.
